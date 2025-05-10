@@ -3,18 +3,27 @@ import numpy as np
 import pickle
 import os
 
-# Get base directory
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-
-# Load model and encoders from the same directory
-with open(os.path.join(BASE_DIR, "fertilizer_model.pkl"), "rb") as f:
+model_path = os.path.join(os.path.dirname(__file__), "fertilizer_model.pkl")
+with open(model_path, "rb") as f:
     model = pickle.load(f)
-with open(os.path.join(BASE_DIR, "soil_encoder.pkl"), "rb") as f:
+
+model_path = os.path.join(os.path.dirname(__file__), "soil_encoder.pkl")
+with open(model_path, "rb") as f:
     soil_encoder = pickle.load(f)
-with open(os.path.join(BASE_DIR, "crop_encoder.pkl"), "rb") as f:
+
+model_path = os.path.join(os.path.dirname(__file__), "crop_encoder.pkl")
+with open(model_path, "rb") as f:
     crop_encoder = pickle.load(f)
-with open(os.path.join(BASE_DIR, "fertilizer_encoder.pkl"), "rb") as f:
+
+model_path = os.path.join(os.path.dirname(__file__), "fertilizer_encoder.pkl")
+with open(model_path, "rb") as f:
     fertilizer_encoder = pickle.load(f)
+
+# Load model and encoders
+# model = pickle.load(open("model/fertilizer_model.pkl", "rb"))
+# soil_encoder = pickle.load(open("model/soil_encoder.pkl", "rb"))
+# crop_encoder = pickle.load(open("model/crop_encoder.pkl", "rb"))
+# fertilizer_encoder = pickle.load(open("model/fertilizer_encoder.pkl", "rb"))
 
 # Web app title
 st.markdown("<h1 style='text-align: center;'>Fertilizer Recommendation System</h1>", unsafe_allow_html=True)
@@ -37,18 +46,15 @@ potassium = st.sidebar.number_input("Potassium (K)", min_value=0.0, max_value=20
 
 # Predict button
 if st.sidebar.button("Predict Fertilizer"):
-    try:
-        # Encode inputs
-        soil_encoded = soil_encoder.transform([soil_type])[0]
-        crop_encoded = crop_encoder.transform([crop_type])[0]
+    # Encode inputs
+    soil_encoded = soil_encoder.transform([soil_type])[0]
+    crop_encoded = crop_encoder.transform([crop_type])[0]
 
-        input_data = np.array([[temperature, humidity, moisture, soil_encoded, crop_encoded,
-                                nitrogen, phosphorus, potassium]])
+    input_data = np.array([[temperature, humidity, moisture, soil_encoded, crop_encoded,
+                            nitrogen, phosphorus, potassium]])
 
-        # Make prediction
-        prediction = model.predict(input_data)
-        fertilizer_name = fertilizer_encoder.inverse_transform(prediction)[0]
+    # Make prediction
+    prediction = model.predict(input_data)
+    fertilizer_name = fertilizer_encoder.inverse_transform(prediction)[0]
 
-        st.success(f"Recommended Fertilizer: *{fertilizer_name}*")
-    except Exception as e:
-        st.error(f"Prediction failed: {e}")
+    st.success(f"Recommended Fertilizer: *{fertilizer_name}*")
